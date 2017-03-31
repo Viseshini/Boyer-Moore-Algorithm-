@@ -1,0 +1,172 @@
+#include <stdio.h>
+#include <time.h>
+#include<stdlib.h>
+#include<string.h>
+
+
+int flen;
+
+int max(int a, int b)
+{
+	if (a>b) return a;
+	else return b;
+}
+
+int matchfirst(char word[100], int sub)
+{
+	int i;
+	int lensub = flen - sub;
+	for (i = 0; i<lensub; i++)
+	{
+		if (word[i] != word[sub + i])
+		{
+			return -1;
+		}
+
+	}
+	return 0;
+}
+
+
+int match(char word[100], int sub)
+{
+	int prev = word[sub - 1];
+	int lensub = flen - sub;
+	int j; int h;
+
+	for (j = sub - 1; j >= 0; j--)
+	{
+		if (j - 1 >= 0)
+		{
+			if (prev == word[j - 1])continue;
+		}
+		int flag = 0; int count = 0;
+		for (h = j; h <= j + lensub - 1; h++)
+		{
+			if (word[h] != word[sub + count])
+			{
+				flag = 1;
+			}
+			count++;
+		}
+
+		if (flag == 1)
+			continue;
+		else
+			return j;
+
+	}
+	return -1;
+
+}
+
+int main(void)
+{
+	clock_t start, end;
+	double cpu_time_used;
+
+	start = clock();
+	int np = 2;
+	int i = 0, j = 0, leng, nword = 0; int k;
+	char str[100], B[10];
+	printf("Enter the string: ");
+	gets(str);
+	leng = strlen(str);
+	printf("Enter the word to find:");
+	gets(B);
+	flen = strlen(B);
+	char *A = (char*)malloc(sizeof(char)*(leng + 1));
+	strcpy(A, str);
+
+
+
+	
+
+
+
+	
+	int fl = 0;
+	char word[100]; int f, sub, result;
+	strcpy(word, B);
+	int dlen = strlen(str);
+	//int gstable[flen];
+	int *gstable = (int*)malloc(sizeof(int)*(flen));
+	int bstable[128];
+	for (i = 0; i <= 127; i++)
+	{
+		bstable[i] = flen;
+	}
+	for (i = 0; i <= flen - 2; i++)
+	{
+		bstable[(int)word[i]] = flen - 1 - i;
+	}
+
+	for (k = 1; k <= flen - 1; k++)
+	{
+		sub = flen - k; f = 0;
+		result = match(word, sub);
+		if (result >= 0)
+		{
+			gstable[k] = sub - result;
+			continue;
+		}
+		for (sub = flen - k + 1; sub <= flen - 1; sub++)
+		{
+			result = matchfirst(word, sub);
+			if (result == 0)
+			{
+				gstable[k] = sub - result;
+				f = 1;
+				break;
+			}
+		}
+		if (f == 0)
+		{
+
+			gstable[k] = flen;
+		}
+	}
+
+	printf("\n\n*********BAD SYMBOL TABLE*********\n");
+	for (i = 0; i <= 127; i++)
+	{
+		printf("\n%d ", bstable[i]);
+	}
+	printf("\n\n******GOOD SUFFIX TABLE IS **********\n");
+	for (i = 1; i <= flen - 1; i++)
+	{
+		printf("\n%d\n", gstable[i]);
+	}
+
+
+
+	i = flen - 1; int shift;
+	while (i <= dlen)
+	{
+		k = 0;
+		while (k <= flen - 1 && A[i - k] == word[flen - 1 - k])
+			k = k + 1;
+
+		if (k == flen) { printf("\nFound at: %d", (i - (flen - 1))); i = i + 1; fl = 1; continue; }
+
+
+		int num = (int)A[i];
+		int d1 = max(bstable[num] - k, 1);
+		int d2 = gstable[k];
+		if (k == 0) { shift = d1; }
+		else if (k>0) shift = max(d1, d2);
+		else {}
+		i = i + shift;
+	}
+	if (!fl)
+		printf("\nPattern not found");
+
+		end = clock();
+	cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+	printf("\nTime in msecs is %f", cpu_time_used / 1000);
+
+	char kz;
+	printf("\nPress any key to continue ......");
+	scanf("%c", &kz);
+	return 0;
+}
